@@ -106,6 +106,12 @@ data:
             <value>{{- .Values.objectStore.impl}}</value>
         </property>
 
+        <property>
+            <!-- https://community.hortonworks.com/content/supportkb/247055/errorjavalangunsupportedoperationexception-storage.html -->
+            <name>metastore.storage.schema.reader.impl</name>
+            <value>org.apache.hadoop.hive.metastore.SerDeStorageSchemaReader</value>
+        </property>
+
       {{- if index .Values.conf "hiveSite" }}
       {{- range $key, $value := index .Values.conf "hiveSite" }}
       <property><name>{{ $key }}</name><value>{{ $value }}</value></property>
