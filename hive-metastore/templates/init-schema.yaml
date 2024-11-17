@@ -12,16 +12,11 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - >
-            if schematool -dbType postgres -info -url "jdbc:postgresql://{{- tpl .Values.connections.database.host . }}:{{- .Values.connections.database.port }}/{{- .Values.connections.database.database }}" 
-            -userName "{{- .Values.connections.database.username }}" 
-            -passWord "{{- .Values.connections.database.password }}" | grep -q "schema exists"; 
+            if schematool -dbType postgres -info -userName "{{- .Values.connections.database.username }}" -passWord "{{- .Values.connections.database.password }}"  -url "jdbc:postgresql://{{- tpl .Values.connections.database.host . }}:{{- .Values.connections.database.port }}/{{- .Values.connections.database.database }}" | grep -q "schema exists"; 
             then 
               echo "Schema already exists. Skipping initialization."; 
             else 
-              schematool --verbose -initSchema -dbType postgres 
-              -userName "{{- .Values.connections.database.username }}" 
-              -passWord "{{- .Values.connections.database.password }}" 
-              -url "jdbc:postgresql://{{- tpl .Values.connections.database.host . }}:{{- .Values.connections.database.port }}/{{- .Values.connections.database.database }}"; 
+              schematool --verbose -initSchema -dbType postgres -userName "{{- .Values.connections.database.username }}" -passWord "{{- .Values.connections.database.password }}" -url "jdbc:postgresql://{{- tpl .Values.connections.database.host . }}:{{- .Values.connections.database.port }}/{{- .Values.connections.database.database }}"; 
             fi
         volumeMounts:
         - name: hive-config
