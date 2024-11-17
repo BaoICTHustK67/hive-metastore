@@ -11,13 +11,18 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
         command: ["/bin/sh", "-c"]
         args:
-          - schematool
-           --verbose
-           -initSchema
-           -dbType postgres
-           -userName "{{- .Values.connections.database.username }}"
-           -passWord "{{- .Values.connections.database.password }}"
-           -url "jdbc:postgresql://{{- tpl .Values.connections.database.host . }}:{{- .Values.connections.database.port }}/{{- .Values.connections.database.database }}"
+          - >
+            if schematool -dbType postgres -info -url "jdbc:postgresql://{{- tpl .Values.connections.database.host . }}:{{- .Values.connections.database.port }}/{{- .Values.connections.database.database }}" 
+            -userName "{{- .Values.connections.database.username }}" 
+            -passWord "{{- .Values.connections.database.password }}" | grep -q "schema exists"; 
+            then 
+              echo "Schema already exists. Skipping initialization."; 
+            else 
+              schematool --verbose -initSchema -dbType postgres 
+              -userName "{{- .Values.connections.database.username }}" 
+              -passWord "{{- .Values.connections.database.password }}" 
+              -url "jdbc:postgresql://{{- tpl .Values.connections.database.host . }}:{{- .Values.connections.database.port }}/{{- .Values.connections.database.database }}"; 
+            fi
         volumeMounts:
         - name: hive-config
           mountPath: /opt/hive-metastore/conf
@@ -29,7 +34,5 @@ spec:
       - name: hive-config
         configMap:
           name: {{ include "hive-metastore.fullname" . }}
-
-
       restartPolicy: Never
   backoffLimit: 3
